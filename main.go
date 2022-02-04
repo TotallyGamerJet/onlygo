@@ -158,7 +158,7 @@ import (
 		if err != nil {
 			return
 		}
-		init.Write(buf.Bytes())
+		_, _ = init.Write(buf.Bytes())
 	}
 	for sys := range libs {
 		buf.Reset()
@@ -183,12 +183,19 @@ import (
 		if err != nil {
 			return
 		}
-		create.Write(buf.Bytes())
+		_, _ = create.Write(buf.Bytes())
 	}
 }
 
 func getType(expr ast.Expr) (ty *Type) {
 	ty = &Type{}
+	if sel, ok := expr.(*ast.SelectorExpr); ok {
+		if sel.Sel.String() != "unsafe" {
+			panic(fmt.Sprintf("unknown selector: %s", sel.Sel.String()))
+		}
+		ty.kind = PTR
+		return
+	}
 	if star, ok := expr.(*ast.StarExpr); ok {
 		ty.kind = PTR
 		ty.ptrType = getType(star.X)
