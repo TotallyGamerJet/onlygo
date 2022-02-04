@@ -43,9 +43,13 @@ type Function struct {
 }
 
 func main() {
-	fmt.Println(os.Args)
+	if len(os.Args) <= 1 {
+		log.Fatal("no files specified")
+		return
+	}
+	var files = os.Args[1:]
 	fs := token.NewFileSet()
-	const fileName = "/Users/jarrettkuklis/Documents/GolandProjects/pure-gl/gl.go"
+	var fileName = files[0]
 	open, err := os.Open(fileName)
 	if err != nil {
 		panic(err)
