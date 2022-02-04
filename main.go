@@ -43,6 +43,7 @@ type Function struct {
 }
 
 func main() {
+	fmt.Println(os.Args)
 	fs := token.NewFileSet()
 	const fileName = "/Users/jarrettkuklis/Documents/GolandProjects/pure-gl/gl.go"
 	open, err := os.Open(fileName)
@@ -144,7 +145,7 @@ import (
 			buf.WriteString(fmt.Sprintf("\t_%s, err = lib.Lookup(\"%s\")\n", f.name, f.linkname))
 			buf.WriteString("\tif err != nil {\n\t\treturn err\n\t}\n")
 		}
-		buf.WriteString("return nil\n")
+		buf.WriteString("\treturn nil\n")
 		buf.WriteString("}\n")
 	}
 	fmt.Println(buf.String())
@@ -154,7 +155,7 @@ import (
 		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
 		buf.WriteString("#include \"textflag.h\"\n\n")
 		for _, f := range functions {
-			gen := NewAmd64FuncGen()
+			gen := NewArm64FuncGen()
 			buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
 			buf.WriteString("\tBL runtime·entersyscall(SB)\n")
 			for i, arg := range f.args {
