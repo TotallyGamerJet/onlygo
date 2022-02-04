@@ -21,12 +21,12 @@ const (
 	I16
 	I32
 	I64
-	Int
+	INT
 	U8
 	U16
 	U32
 	U64
-	UInt
+	UINT
 	F32
 	F64
 )
@@ -214,7 +214,7 @@ func getType(expr ast.Expr) (ty *Type) {
 	case "int64":
 		ty.kind = I64
 	case "int":
-		ty.kind = Int
+		ty.kind = INT
 	case "uint8":
 		ty.kind = U8
 	case "uint16":
@@ -224,7 +224,7 @@ func getType(expr ast.Expr) (ty *Type) {
 	case "uint64":
 		ty.kind = U64
 	case "uint":
-		ty.kind = UInt
+		ty.kind = UINT
 	case "float32":
 		ty.kind = F32
 	case "float64":
