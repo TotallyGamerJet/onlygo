@@ -1,14 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
-func NewArm64FuncGen() FuncGen {
+func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 	var GPRL = []string{"R0", "R1", "R2", "R3", "R4", "R5", "R6"}
 	var FPRL = []string{"F0", "F1", "F2", "F3"}
 	return FuncGen{
-		MovInst: func() func(*Type, int) string {
+		PreCall: func() {
+			fmt.Fprintf(w, "\tBL runtime·entersyscall(SB)\n")
+		},
+		PostCall: func() {
+			fmt.Fprintf(w, "\tBL runtime·exitsyscall(SB)\n")
+		},
+		MovInst: func() func(*Type, int) {
 			var offset int // current offset so far
-			return func(ty *Type, index int) (out string) {
+			return func(ty *Type, index int) {
 				pad := func(to int) {
 					for offset%to != 0 {
 						offset++
@@ -16,34 +25,39 @@ func NewArm64FuncGen() FuncGen {
 				}
 				switch ty.kind {
 				case U8, I8:
-					out = fmt.Sprintf("\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
 					offset += 1
-					return out
+					return
 				case PTR, INT, UINT:
 					pad(8)
-					out = fmt.Sprintf("\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
 					offset += 8
-					return out
+					return
 				case U32, I32:
-					out = fmt.Sprintf("\tMOVW _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVW _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
 					offset += 4
-					return out
+					return
 				case F32:
-					out = fmt.Sprintf("\tFMOVD _%s+%d(FP), %s\n", ty.name, offset, FPRL[index])
+					fmt.Fprintf(w, "\tFMOVD _%s+%d(FP), %s\n", ty.name, offset, FPRL[index])
 					offset += 4
-					return out
+					return
 				default:
 					panic(ty.kind)
 				}
 			}
 		}(),
-		RetInst: func(ty *Type) string {
+		RetInst: func(ty *Type) {
 			switch ty.kind {
-			case PTR, U32:
-				return "MOVD R0, ret+8(FP)"
+			case U32:
+				fmt.Fprintf(w, "\tMOVW R0, ret+8(FP)\n") // TODO: calculate where return is
+			case PTR:
+				fmt.Fprintf(w, "\tMOVD R0, ret+8(FP)\n")
 			default:
 				panic(ty.kind)
 			}
+		},
+		GenCall: func(name string) {
+			fmt.Fprintf(w, "\tMOVD ·_%s(SB), R16\n\tCALL R16\n", name)
 		},
 	}
 }

@@ -40,6 +40,7 @@ type Type struct {
 type Function struct {
 	name     string  // name of the Go func
 	linkname string  // name to link to
+	sig      string  // the signature as written in go
 	args     []*Type // the arguments to the func
 	ret      *Type   // what if anything it returns
 }
@@ -90,9 +91,9 @@ func main() {
 				return false
 			}
 			var (
-				name, linkname string
-				args           []*Type
-				ret            *Type
+				name, linkname, sig string
+				args                []*Type
+				ret                 *Type
 			)
 			{
 				typ := n.Type
@@ -119,7 +120,7 @@ func main() {
 				}
 			}
 			functions = append(functions, Function{
-				name, linkname, args, ret,
+				name, linkname, sig, args, ret,
 			})
 		}
 		return true
@@ -165,18 +166,18 @@ import (
 		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
 		buf.WriteString("#include \"textflag.h\"\n\n")
 		for _, f := range functions {
-			gen := NewArm64FuncGen()
+			gen := NewArm64FuncGen(buf, f)
+			buf.WriteString(fmt.Sprintf("//%s", f.sig))
 			buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
-			buf.WriteString("\tBL runtime·entersyscall(SB)\n")
+			gen.PreCall()
 			for i, arg := range f.args {
-				buf.WriteString(fmt.Sprintf("%s", gen.MovInst(arg, i)))
+				gen.MovInst(arg, i)
 			}
-			buf.WriteString(fmt.Sprintf("\tMOVD ·_%s(SB), R16\n", f.name))
-			buf.WriteString("\tCALL R16\n")
+			gen.GenCall(f.name)
 			if f.ret.kind != VOID {
-				buf.WriteString(fmt.Sprintf("\t%s\n", gen.RetInst(f.ret)))
+				gen.RetInst(f.ret)
 			}
-			buf.WriteString("\tBL runtime·exitsyscall(SB)\n")
+			gen.PostCall()
 			buf.WriteString("\tRET\n\n")
 		}
 		create, err := os.Create(fileNameNoExt + "_" + sys + "_arm64.s") // TODO: other archs
