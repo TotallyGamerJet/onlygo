@@ -190,7 +190,7 @@ import (
 func getType(expr ast.Expr) (ty *Type) {
 	ty = &Type{}
 	if sel, ok := expr.(*ast.SelectorExpr); ok {
-		if sel.Sel.String() != "unsafe" {
+		if sel.Sel.String() != "Pointer" {
 			panic(fmt.Sprintf("unknown selector: %s", sel.Sel.String()))
 		}
 		ty.kind = PTR
