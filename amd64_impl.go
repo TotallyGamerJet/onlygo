@@ -47,11 +47,15 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 			}
 		}(),
 		RetInst: func(ty *Type) {
+			var retLoc int
+			if len(fn.args) != 0 {
+				retLoc = 8 // TODO: calc proper loc
+			}
 			switch ty.kind {
 			case U32:
-				fmt.Fprintf(w, "\tMOVW R0, ret+8(FP)\n") // TODO: calculate where return is
+				fmt.Fprintf(w, "\tMOVW R0, ret+%d(FP)\n", retLoc)
 			case PTR:
-				fmt.Fprintf(w, "\tMOVD R0, ret+8(FP)\n")
+				fmt.Fprintf(w, "\tMOVD R0, ret+%d(FP)\n", retLoc)
 			default:
 				panic(ty.kind)
 			}
