@@ -205,6 +205,8 @@ func getType(expr ast.Expr) (ty *Type) {
 	switch ident.Name {
 	case "bool":
 		ty.kind = U8
+	case "uintptr":
+		ty.kind = PTR
 	case "int8":
 		ty.kind = I8
 	case "int16":
