@@ -177,7 +177,7 @@ import (
 			buf.WriteString("\tBL runtime·exitsyscall(SB)\n")
 			buf.WriteString("\tRET\n\n")
 		}
-		create, err := os.Create(fileNameNoExt + "_" + sys + "_arm64.s\n") // TODO: other archs
+		create, err := os.Create(fileNameNoExt + "_" + sys + "_arm64.s") // TODO: other archs
 		if err != nil {
 			return
 		}
