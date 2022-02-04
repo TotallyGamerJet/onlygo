@@ -50,6 +50,7 @@ func main() {
 	var files = os.Args[1:]
 	fs := token.NewFileSet()
 	var fileName = files[0]
+	var fileNameNoExt = fileName[:strings.IndexRune(fileName, '.')]
 	open, err := os.Open(fileName)
 	if err != nil {
 		panic(err)
@@ -123,8 +124,8 @@ func main() {
 	})
 	var buf = &bytes.Buffer{}
 	for sys, lib := range libs {
-		buf.WriteString("gl_" + sys + "_init.go\n")
-		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
+		buf.Reset()
+		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n\n")
 		buf.WriteString(fmt.Sprintf("package %s\n", package_))
 
 		// import generation
@@ -151,11 +152,14 @@ import (
 		}
 		buf.WriteString("\treturn nil\n")
 		buf.WriteString("}\n")
+		init, err := os.Create(fileNameNoExt + "_" + sys + "_init.go")
+		if err != nil {
+			return
+		}
+		init.Write(buf.Bytes())
 	}
-	fmt.Println(buf.String())
-	buf.Truncate(0) // TODO: new file
 	for sys := range libs {
-		buf.WriteString("gl_" + sys + "_arm64.s\n") //TODO: generate for other archs
+		buf.Reset()
 		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
 		buf.WriteString("#include \"textflag.h\"\n\n")
 		for _, f := range functions {
@@ -173,8 +177,12 @@ import (
 			buf.WriteString("\tBL runtime·exitsyscall(SB)\n")
 			buf.WriteString("\tRET\n\n")
 		}
+		create, err := os.Create(fileNameNoExt + "_" + sys + "_arm64.s\n") // TODO: other archs
+		if err != nil {
+			return
+		}
+		create.Write(buf.Bytes())
 	}
-	fmt.Println(buf.String())
 }
 
 func getType(expr ast.Expr) (ty *Type) {
