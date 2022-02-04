@@ -167,7 +167,7 @@ import (
 		buf.WriteString("#include \"textflag.h\"\n\n")
 		for _, f := range functions {
 			gen := NewArm64FuncGen(buf, f)
-			buf.WriteString(fmt.Sprintf("//%s", f.sig))
+			buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
 			buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
 			gen.PreCall()
 			for i, arg := range f.args {
