@@ -15,6 +15,10 @@ func NewArm64FuncGen() FuncGen {
 					}
 				}
 				switch ty.kind {
+				case U8, I8:
+					out = fmt.Sprintf("\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					offset += 1
+					return out
 				case PTR, INT, UINT:
 					pad(8)
 					out = fmt.Sprintf("\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
