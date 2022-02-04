@@ -194,6 +194,8 @@ func getType(expr ast.Expr) (ty *Type) {
 	}
 	ident := expr.(*ast.Ident)
 	switch ident.Name {
+	case "bool":
+		ty.kind = U8
 	case "int8":
 		ty.kind = I8
 	case "int16":
