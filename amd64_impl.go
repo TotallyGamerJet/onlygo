@@ -56,7 +56,7 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 				case U32, I32, F32:
 					retLoc += 4
 				default:
-					panic(*a)
+					panic(fmt.Sprintf("%+v\n", a))
 				}
 			}
 			for retLoc%8 != 0 {
