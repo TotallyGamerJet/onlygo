@@ -6,8 +6,8 @@ import (
 )
 
 func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
-	var GPRL = []string{"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7"}
-	var FPRL = []string{"F0", "F1", "F2", "F3"}
+	var GPRL = [...]string{"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R16"}
+	var FPRL = [...]string{"F0", "F1", "F2", "F3"}
 	return FuncGen{
 		PreCall: func() {
 			fmt.Fprintf(w, "\tBL runtime·entersyscall(SB)\n")
@@ -22,6 +22,12 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 					for offset%to != 0 {
 						offset++
 					}
+				}
+				if index >= len(GPRL)-1 {
+					index = len(GPRL) - 1 // push the value onto stack
+					defer func() {
+						fmt.Fprintf(w, "\tPUSH AX\n")
+					}()
 				}
 				switch ty.kind {
 				case U8, I8:
