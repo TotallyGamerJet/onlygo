@@ -6,7 +6,7 @@ import (
 )
 
 func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
-	var GPRL = []string{"R0", "R1", "R2", "R3", "R4", "R5", "R6"}
+	var GPRL = []string{"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7"}
 	var FPRL = []string{"F0", "F1", "F2", "F3"}
 	return FuncGen{
 		PreCall: func() {
