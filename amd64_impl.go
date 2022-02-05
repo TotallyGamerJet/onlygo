@@ -59,6 +59,9 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 					panic(*a)
 				}
 			}
+			for retLoc%8 != 0 {
+				retLoc++
+			}
 			switch ty.kind {
 			case U32, I32:
 				fmt.Fprintf(w, "\tMOVL AX, ret+%d(SP)\n", retLoc)
