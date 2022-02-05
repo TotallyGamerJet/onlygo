@@ -100,7 +100,10 @@ func main() {
 				typ := n.Type
 				name = n.Name.Name
 				linkname = name // linkname is guessed to be the same as the func name unless a go:linkname directive exists
-				comments := n.Doc.List
+				var comments []*ast.Comment
+				if n.Doc != nil {
+					comments = n.Doc.List
+				}
 				for _, c := range comments {
 					if !strings.HasPrefix(c.Text, "//onlygo:linkname") {
 						continue
