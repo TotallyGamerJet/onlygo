@@ -26,7 +26,7 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 				if index >= len(GPRL)-1 {
 					index = len(GPRL) - 1 // push the value onto stack
 					defer func() {
-						fmt.Fprintf(w, "\tPUSH AX\n")
+						fmt.Fprintf(w, "\tSTP (R16, R16), -16(RSP)\n")
 					}()
 				}
 				switch ty.kind {
@@ -60,8 +60,15 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 		}(),
 		RetInst: func(ty *Type) {
 			var retLoc int
-			if len(fn.args) != 0 {
-				retLoc = 8 // TODO: calc proper loc
+			for _, a := range fn.args {
+				switch a.kind {
+				case PTR, INT, I64, F64:
+					retLoc += 8
+				case U32, I32, F32:
+					retLoc += 4
+				default:
+					panic(*a)
+				}
 			}
 			switch ty.kind {
 			case U32, I32:
