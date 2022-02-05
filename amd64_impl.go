@@ -28,7 +28,7 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 					fmt.Fprintf(w, "\tMOVBLZX _%s+%d(SP), %s\n", ty.name, offset, GPRL[index])
 					offset += 1
 					return
-				case PTR, INT, UINT:
+				case PTR, INT, UINT, I64:
 					pad(8)
 					fmt.Fprintf(w, "\tMOVQ _%s+%d(SP), %s\n", ty.name, offset, GPRL[index])
 					offset += 8

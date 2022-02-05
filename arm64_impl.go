@@ -34,7 +34,7 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 					fmt.Fprintf(w, "\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
 					offset += 1
 					return
-				case PTR, INT, UINT:
+				case PTR, INT, UINT, I64:
 					pad(8)
 					fmt.Fprintf(w, "\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
 					offset += 8
