@@ -48,9 +48,9 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 			}
 		}(),
 		RetInst: func(ty *Type) {
-			var retLoc int
+			var retLoc int = 8
 			if len(fn.args) != 0 {
-				retLoc = 8 // TODO: calc proper loc
+				retLoc = 16 // TODO: calc proper loc
 			}
 			switch ty.kind {
 			case U32:
