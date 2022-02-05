@@ -5,18 +5,18 @@ import (
 	"io"
 )
 
-func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
-	var GPRL = []string{"R0", "R1", "R2", "R3", "R4", "R5", "R6"}
-	var FPRL = []string{"F0", "F1", "F2", "F3"}
+func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
+	var GPRL = []string{"DI", "SI", "DX", "CX", "R8", "R9"}
+	var FPRL = []string{"X0", "X1", "X2", "X3"}
 	return FuncGen{
 		PreCall: func() {
-			fmt.Fprintf(w, "\tBL runtime·entersyscall(SB)\n")
+			fmt.Fprintf(w, "\tCALL runtime·entersyscall(SB)\n")
 		},
 		PostCall: func() {
-			fmt.Fprintf(w, "\tBL runtime·exitsyscall(SB)\n")
+			fmt.Fprintf(w, "\tCALL runtime·exitsyscall(SB)\n")
 		},
 		MovInst: func() func(*Type, int) {
-			var offset int // current offset so far
+			var offset = 8 // current offset so far
 			return func(ty *Type, index int) {
 				pad := func(to int) {
 					for offset%to != 0 {
@@ -25,26 +25,21 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 				}
 				switch ty.kind {
 				case U8, I8:
-					fmt.Fprintf(w, "\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVBLZX _%s+%d(SP), %s\n", ty.name, offset, GPRL[index])
 					offset += 1
 					return
 				case PTR, INT, UINT:
 					pad(8)
-					fmt.Fprintf(w, "\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVQ _%s+%d(SP), %s\n", ty.name, offset, GPRL[index])
 					offset += 8
 					return
-				case I32:
+				case I32, U32:
 					pad(4)
-					fmt.Fprintf(w, "\tMOVW _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
-					offset += 4
-					return
-				case U32:
-					pad(4)
-					fmt.Fprintf(w, "\tMOVWU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVL _%s+%d(SP), %s\n", ty.name, offset, GPRL[index])
 					offset += 4
 					return
 				case F32:
-					fmt.Fprintf(w, "\tFMOVD _%s+%d(FP), %s\n", ty.name, offset, FPRL[index])
+					fmt.Fprintf(w, "\tMOVSS _%s+%d(SP), %s\n", ty.name, offset, FPRL[index])
 					offset += 4
 					return
 				default:
@@ -59,15 +54,15 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 			}
 			switch ty.kind {
 			case U32:
-				fmt.Fprintf(w, "\tMOVW R0, ret+%d(FP)\n", retLoc)
+				fmt.Fprintf(w, "\tMOVL AX, ret+%d(SP)\n", retLoc)
 			case PTR:
-				fmt.Fprintf(w, "\tMOVD R0, ret+%d(FP)\n", retLoc)
+				fmt.Fprintf(w, "\tMOVQ AX, ret+%d(SP)\n", retLoc)
 			default:
 				panic(ty.kind)
 			}
 		},
 		GenCall: func(name string) {
-			fmt.Fprintf(w, "\tMOVD ·_%s(SB), R16\n\tCALL R16\n", name)
+			fmt.Fprintf(w, "\tMOVD ·_%s(SB), AX\n\tCALL AX\n", name)
 		},
 	}
 }

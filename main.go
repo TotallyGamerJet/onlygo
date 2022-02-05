@@ -155,36 +155,38 @@ import (
 		}
 		buf.WriteString("\treturn nil\n")
 		buf.WriteString("}\n")
-		init, err := os.Create(fileNameNoExt + "_" + sys + "_init.go")
+		init, err := os.Create(fileNameNoExt + "_init_" + sys + ".go")
 		if err != nil {
 			return
 		}
 		_, _ = init.Write(buf.Bytes())
 	}
 	for sys := range libs {
-		buf.Reset()
-		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
-		buf.WriteString("#include \"textflag.h\"\n\n")
-		for _, f := range functions {
-			gen := NewArm64FuncGen(buf, f)
-			buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
-			buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
-			gen.PreCall()
-			for i, arg := range f.args {
-				gen.MovInst(arg, i)
+		for arch, genFn := range generators[sys] {
+			buf.Reset()
+			buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
+			buf.WriteString("#include \"textflag.h\"\n\n")
+			for _, f := range functions {
+				gen := genFn(buf, f)
+				buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
+				buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
+				gen.PreCall()
+				for i, arg := range f.args {
+					gen.MovInst(arg, i)
+				}
+				gen.GenCall(f.name)
+				if f.ret.kind != VOID {
+					gen.RetInst(f.ret)
+				}
+				gen.PostCall()
+				buf.WriteString("\tRET\n\n")
 			}
-			gen.GenCall(f.name)
-			if f.ret.kind != VOID {
-				gen.RetInst(f.ret)
+			create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".s") // TODO: other archs
+			if err != nil {
+				return
 			}
-			gen.PostCall()
-			buf.WriteString("\tRET\n\n")
+			_, _ = create.Write(buf.Bytes())
 		}
-		create, err := os.Create(fileNameNoExt + "_" + sys + "_arm64.s") // TODO: other archs
-		if err != nil {
-			return
-		}
-		_, _ = create.Write(buf.Bytes())
 	}
 }
 
