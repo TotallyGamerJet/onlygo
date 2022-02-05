@@ -69,7 +69,7 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 				fmt.Fprintf(w, "\tMOVB AX, ret+%d(SP)\n", retLoc)
 			case U32, I32:
 				fmt.Fprintf(w, "\tMOVL AX, ret+%d(SP)\n", retLoc)
-			case PTR:
+			case PTR, INT, I64, U64:
 				fmt.Fprintf(w, "\tMOVQ AX, ret+%d(SP)\n", retLoc)
 			default:
 				panic(ty.kind)

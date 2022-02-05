@@ -80,7 +80,7 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 				fmt.Fprintf(w, "\tMOVB R0, ret+%d(FP)\n", retLoc)
 			case U32, I32:
 				fmt.Fprintf(w, "\tMOVW R0, ret+%d(FP)\n", retLoc)
-			case PTR:
+			case PTR, INT, I64, U64:
 				fmt.Fprintf(w, "\tMOVD R0, ret+%d(FP)\n", retLoc)
 			default:
 				panic(ty.kind)
