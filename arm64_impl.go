@@ -66,6 +66,8 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 					retLoc += 8
 				case U32, I32, F32:
 					retLoc += 4
+				case I8, U8:
+					retLoc++
 				default:
 					panic(fmt.Sprintf("%+v\n", a))
 				}
