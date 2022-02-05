@@ -74,7 +74,7 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 				retLoc++
 			}
 			switch ty.kind {
-			case I8:
+			case I8, U8:
 				fmt.Fprintf(w, "\tMOVB R0, ret+%d(FP)\n", retLoc)
 			case U32, I32:
 				fmt.Fprintf(w, "\tMOVW R0, ret+%d(FP)\n", retLoc)
