@@ -134,7 +134,7 @@ func main() {
 		// import generation
 		buf.WriteString(`
 import (
-	"github.com/totallygamerjet/pure-gl/internal/dyld"
+	"github.com/totallygamerjet/dl"
 )
 `)
 
@@ -147,7 +147,7 @@ import (
 
 		// Init function generation
 		buf.WriteString("func Init() error {\n")
-		buf.WriteString(fmt.Sprintf("\tlib, err := dyld.Open(\"%s\", dyld.ScopeGlobal)\n", lib))
+		buf.WriteString(fmt.Sprintf("\tlib, err := dl.Open(\"%s\", dl.ScopeGlobal)\n", lib))
 		buf.WriteString("\tif err != nil {\n\t\treturn err\n\t}\n")
 		for _, f := range functions {
 			buf.WriteString(fmt.Sprintf("\t_%s, err = lib.Lookup(\"%s\")\n", f.name, f.linkname))
