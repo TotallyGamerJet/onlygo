@@ -189,13 +189,10 @@ import (
 			}
 			create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".s") // TODO: other archs
 			if err != nil {
+				panic(err)
 				return
 			}
-			formatted, err := format.Source(buf.Bytes())
-			if err != nil {
-				panic(err)
-			}
-			_, _ = create.Write(formatted)
+			_, _ = create.Write(buf.Bytes())
 		}
 	}
 }
