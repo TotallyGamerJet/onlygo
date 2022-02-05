@@ -53,7 +53,7 @@ func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 				retLoc = 16 // TODO: calc proper loc
 			}
 			switch ty.kind {
-			case U32:
+			case U32, I32:
 				fmt.Fprintf(w, "\tMOVL AX, ret+%d(SP)\n", retLoc)
 			case PTR:
 				fmt.Fprintf(w, "\tMOVQ AX, ret+%d(SP)\n", retLoc)
