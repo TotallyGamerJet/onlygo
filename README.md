@@ -35,3 +35,15 @@ comment to make this process easier.
 ```go
 //go:generate onlygo libc.go
 ```
+
+## Support
+Currently only a few OSs and Architectures are partially supported but it
+should be easy enough to add more. Look at the [implementations](amd64_impl.go).
+ - [x] MacOS
+   - [x] AMD64
+   - [x] ARM64
+ - [ ] Linux
+   - [ ] AMD64
+ - [ ] Windows
+   - [ ] AMD64
+   - [ ] ARM64
