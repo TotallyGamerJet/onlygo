@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"io"
@@ -157,9 +158,14 @@ import (
 		buf.WriteString("}\n")
 		init, err := os.Create(fileNameNoExt + "_init_" + sys + ".go")
 		if err != nil {
+			panic(err)
 			return
 		}
-		_, _ = init.Write(buf.Bytes())
+		formatted, err := format.Source(buf.Bytes())
+		if err != nil {
+			panic(err)
+		}
+		_, _ = init.Write(formatted)
 	}
 	for sys := range libs {
 		for arch, genFn := range generators[sys] {
@@ -185,7 +191,11 @@ import (
 			if err != nil {
 				return
 			}
-			_, _ = create.Write(buf.Bytes())
+			formatted, err := format.Source(buf.Bytes())
+			if err != nil {
+				panic(err)
+			}
+			_, _ = create.Write(formatted)
 		}
 	}
 }
