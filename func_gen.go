@@ -5,7 +5,7 @@ import "io"
 type FuncGen struct {
 	PreCall  func()
 	PostCall func()
-	MovInst  func(*Type, int)
+	MovInst  func(*Type)
 	RetInst  func(*Type)
 	GenCall  func(string)
 }

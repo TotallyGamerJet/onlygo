@@ -15,43 +15,50 @@ func NewArm64FuncGen(w io.Writer, fn Function) FuncGen {
 		PostCall: func() {
 			fmt.Fprintf(w, "\tBL runtime·exitsyscall(SB)\n")
 		},
-		MovInst: func() func(*Type, int) {
+		MovInst: func() func(*Type) {
 			var offset int // current offset so far
-			return func(ty *Type, index int) {
+			var intC int   // the number of ints put so far
+			var floatC int // the number of floats put so far
+			return func(ty *Type) {
 				pad := func(to int) {
 					for offset%to != 0 {
 						offset++
 					}
 				}
-				if index >= len(GPRL)-1 {
-					index = len(GPRL) - 1 // push the value onto stack
+				if intC >= len(GPRL)-1 {
+					intC = len(GPRL) - 1 // push the value onto stack
 					defer func() {
 						fmt.Fprintf(w, "\tSTP (R16, R16), -16(RSP)\n")
 					}()
 				}
 				switch ty.kind {
 				case U8, I8:
-					fmt.Fprintf(w, "\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVBU _%s+%d(FP), %s\n", ty.name, offset, GPRL[intC])
 					offset += 1
+					intC++
 					return
 				case PTR, INT, UINT, I64:
 					pad(8)
-					fmt.Fprintf(w, "\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVD _%s+%d(FP), %s\n", ty.name, offset, GPRL[intC])
 					offset += 8
+					intC++
 					return
 				case I32:
 					pad(4)
-					fmt.Fprintf(w, "\tMOVW _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVW _%s+%d(FP), %s\n", ty.name, offset, GPRL[intC])
 					offset += 4
+					intC++
 					return
 				case U32:
 					pad(4)
-					fmt.Fprintf(w, "\tMOVWU _%s+%d(FP), %s\n", ty.name, offset, GPRL[index])
+					fmt.Fprintf(w, "\tMOVWU _%s+%d(FP), %s\n", ty.name, offset, GPRL[intC])
 					offset += 4
+					intC++
 					return
 				case F32:
-					fmt.Fprintf(w, "\tFMOVD _%s+%d(FP), %s\n", ty.name, offset, FPRL[index])
+					fmt.Fprintf(w, "\tFMOVD _%s+%d(FP), %s\n", ty.name, offset, FPRL[floatC])
 					offset += 4
+					floatC++
 					return
 				default:
 					panic(ty.kind)

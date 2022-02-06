@@ -180,8 +180,8 @@ import (
 				buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
 				buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
 				gen.PreCall()
-				for i, arg := range f.args {
-					gen.MovInst(arg, i)
+				for _, arg := range f.args {
+					gen.MovInst(arg)
 				}
 				gen.GenCall(f.name)
 				if f.ret.kind != VOID {
