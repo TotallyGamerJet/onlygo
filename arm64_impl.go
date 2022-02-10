@@ -98,9 +98,9 @@ func sizeof(ty *Type) (ret int) {
 		return 1
 	case U16, I16:
 		return 2
-	case U32, I32:
+	case U32, I32, F32:
 		return 4
-	case U64, UINT, I64, INT, PTR:
+	case U64, UINT, I64, INT, PTR, F64:
 		return 8
 	default:
 		panic(ty.kind)
