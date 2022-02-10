@@ -5,9 +5,9 @@ import (
 	"io"
 )
 
-func NewAmd64FuncGen(w io.Writer, fn Function) FuncGen {
+func newAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 	var GPRL = [...]string{"DI", "SI", "DX", "CX", "R8", "R9"}
-	var FPRL = [...]string{"X0", "X1", "X2", "X3"}
+	var FPRL = [...]string{"X0", "X1", "X2", "X3", "X4", "X5", "X6", "X7"}
 	return FuncGen{
 		PreCall: func() {
 			fmt.Fprintf(w, "\tCALL runtime·entersyscall(SB)\n")

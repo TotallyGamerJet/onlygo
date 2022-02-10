@@ -12,7 +12,7 @@ type FuncGen struct {
 
 var generators = map[string]map[string]func(io.Writer, Function) FuncGen{
 	"darwin": {
-		"arm64": NewArm64FuncGen,
-		"amd64": NewAmd64FuncGen,
+		"arm64": newArm64FuncGen,
+		"amd64": newAmd64FuncGen,
 	},
 }

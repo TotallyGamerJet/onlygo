@@ -30,12 +30,17 @@ const (
 	UINT
 	F32
 	F64
+	STRUCT // struct
+	ARRAY
 )
 
 type Type struct {
-	name    string
-	kind    TypeKind
-	ptrType *Type
+	name           string
+	kind           TypeKind
+	underlyingType *Type   // Underlying type if pointer or array
+	fields         []*Type // used only if kind == STRUCT
+	length         int     // only used if kind == ARRAY
+	padding        int     // any padding this type receives
 }
 
 type Function struct {
@@ -202,6 +207,17 @@ import (
 
 func getType(expr ast.Expr) (ty *Type) {
 	ty = &Type{}
+	if sel, ok := expr.(*ast.ArrayType); ok {
+		panic(sel)
+	}
+	if sel, ok := expr.(*ast.StructType); ok {
+		ty.kind = STRUCT
+		ty.fields = make([]*Type, sel.Fields.NumFields())
+		for i, f := range sel.Fields.List {
+			ty.fields[i] = getType(f.Type)
+		}
+		return
+	}
 	if sel, ok := expr.(*ast.SelectorExpr); ok {
 		if sel.Sel.String() != "Pointer" {
 			panic(fmt.Sprintf("unknown selector: %s", sel.Sel.String()))
@@ -211,7 +227,7 @@ func getType(expr ast.Expr) (ty *Type) {
 	}
 	if star, ok := expr.(*ast.StarExpr); ok {
 		ty.kind = PTR
-		ty.ptrType = getType(star.X)
+		ty.underlyingType = getType(star.X)
 		return
 	}
 	ident := expr.(*ast.Ident)
