@@ -143,7 +143,7 @@ func main() {
 	var buf = &bytes.Buffer{}
 	for sys, archs := range libs {
 		for arch, lib := range archs {
-			create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".go")
+			create, err := os.Create(fileNameNoExt + "_so_" + sys + "_" + arch + ".go")
 			if err != nil {
 				panic(err)
 			}
