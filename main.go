@@ -73,21 +73,27 @@ func main() {
 		panic(err)
 	}
 	var package_ = file.Name.Name
-	var functions []Function           // the functions to generate
-	var libs = make(map[string]string) // the os -> shared object file
+	var functions []Function                      // the functions to generate
+	var libs = make(map[string]map[string]string) // the os -> arch -> shared object file
 	for _, cg := range file.Comments {
 		for _, c := range cg.List {
 			if !strings.HasPrefix(c.Text, "//onlygo:open") {
 				continue
 			}
 			args := strings.Split(c.Text, " ")
-			if len(args) != 3 {
-				log.Println("incorrect format for //onlygo:open GOOS LIB")
+			if len(args) != 4 {
+				log.Println("incorrect format for //onlygo:open GOOS GOARCH LIB")
 				continue
 			}
 			system := args[1]
-			lib := args[2]
-			libs[system] = lib
+			arch := args[2]
+			lib := args[3]
+			archs := libs[system]
+			if archs == nil {
+				archs = make(map[string]string)
+				libs[system] = archs
+			}
+			archs[arch] = lib
 		}
 	}
 	ast.Inspect(file, func(node ast.Node) bool {
@@ -135,13 +141,15 @@ func main() {
 		return true
 	})
 	var buf = &bytes.Buffer{}
-	for sys, lib := range libs {
-		create, err := os.Create(fileNameNoExt + "_" + sys + ".go")
-		if err != nil {
-			panic(err)
+	for sys, archs := range libs {
+		for arch, lib := range archs {
+			create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".go")
+			if err != nil {
+				panic(err)
+			}
+			create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
+			create.Close()
 		}
-		create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
-		create.Close()
 	}
 	{ // Init function
 		buf.Reset()
@@ -187,32 +195,34 @@ import (
 			return
 		}
 	}
-	for sys := range libs {
-		for arch, genFn := range generators[sys] {
-			buf.Reset()
-			buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
-			buf.WriteString("#include \"textflag.h\"\n\n")
-			for _, f := range functions {
-				gen := genFn(buf, f)
-				buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
-				buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
-				gen.PreCall()
-				for _, arg := range f.args {
-					gen.MovInst(arg)
+	for sys, archs := range libs {
+		for arch := range archs {
+			if genFn, ok := generators[sys][arch]; ok {
+				buf.Reset()
+				buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n")
+				buf.WriteString("#include \"textflag.h\"\n\n")
+				for _, f := range functions {
+					gen := genFn(buf, f)
+					buf.WriteString(fmt.Sprintf("//%s\n", f.sig))
+					buf.WriteString(fmt.Sprintf("TEXT ·%s(SB), NOSPLIT, $0-0\n", f.name)) //TODO: calc proper stacksize
+					gen.PreCall()
+					for _, arg := range f.args {
+						gen.MovInst(arg)
+					}
+					gen.GenCall(f.name)
+					if f.ret.kind != VOID {
+						gen.RetInst(f.ret)
+					}
+					gen.PostCall()
+					buf.WriteString("\tRET\n\n")
 				}
-				gen.GenCall(f.name)
-				if f.ret.kind != VOID {
-					gen.RetInst(f.ret)
+				create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".s") // TODO: other archs
+				if err != nil {
+					panic(err)
+					return
 				}
-				gen.PostCall()
-				buf.WriteString("\tRET\n\n")
+				_, _ = create.Write(buf.Bytes())
 			}
-			create, err := os.Create(fileNameNoExt + "_" + sys + "_" + arch + ".s") // TODO: other archs
-			if err != nil {
-				panic(err)
-				return
-			}
-			_, _ = create.Write(buf.Bytes())
 		}
 	}
 }

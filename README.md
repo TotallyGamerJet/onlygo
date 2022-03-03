@@ -13,10 +13,10 @@ Create a go file that will hold the function stubs.
 First, create a comment that tells onlygo what dynamic libray
 it should be linking to. This comment should peferably be near
 the top of the go file for easy discovery. The format of this comment
-starts with `onlygo:open` then followed by the os and library name.
-Do this comment for each OS you want to be generated.
+starts with `onlygo:open` then followed by the os, architecture and library name.
+Do this comment for each OS and arch combo you want to be generated.
 ```go
-//onlygo:open darwin libSystem.dylib
+//onlygo:open darwin arm64 libSystem.dylib
 ```
 Next, write stub functions for each C function you want to call.
 You MUST match the signature exactly so that onlygo can
