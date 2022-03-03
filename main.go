@@ -164,7 +164,7 @@ import (
 
 		// Init function generation
 		buf.WriteString("func Init() error {\n")
-		buf.WriteString(fmt.Sprintf("\tlib, err := dl.Open(\"_%s_SharedObject\", dl.ScopeGlobal)\n", fileNameNoExt))
+		buf.WriteString(fmt.Sprintf("\tlib, err := dl.Open(_%s_SharedObject, dl.ScopeGlobal)\n", fileNameNoExt))
 		buf.WriteString("\tif err != nil {\n\t\treturn err\n\t}\n")
 		for _, f := range functions {
 			buf.WriteString(fmt.Sprintf("\t_%s, err = lib.Lookup(\"%s\")\n", f.name, f.linkname))
