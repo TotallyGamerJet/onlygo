@@ -36,14 +36,28 @@ comment to make this process easier.
 //go:generate onlygo libc.go
 ```
 
+OnlyGo will generate a file ending in `*_init.go`. This file contains a function
+with the signature `func Init()` that MUST be called before calling any of the
+dynamically linked to functions. This function links the go function to the 
+C function.
+
+## Type Guide
+TODO:
+
 ## Support
 Currently only a few OSs and Architectures are partially supported but it
 should be easy enough to add more. Look at the [implementations](amd64_impl.go).
  - [x] MacOS
    - [x] AMD64
    - [x] ARM64
+ - [x] iOS
+   - [x] ARM64
  - [ ] Linux
    - [ ] AMD64
+   - [x] ARM64
  - [ ] Windows
    - [ ] AMD64
    - [ ] ARM64
+
+## License
+[MIT](LICENSE)
