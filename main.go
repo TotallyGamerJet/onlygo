@@ -182,6 +182,10 @@ import (
 			panic(err)
 		}
 		_, _ = init.Write(formatted)
+		err = init.Close()
+		if err != nil {
+			return
+		}
 	}
 	for sys := range libs {
 		for arch, genFn := range generators[sys] {
