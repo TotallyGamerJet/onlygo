@@ -147,8 +147,8 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
-			create.Close()
+			_, _ = create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
+			_ = create.Close()
 		}
 	}
 	{ // Init function
@@ -222,6 +222,8 @@ import (
 					return
 				}
 				_, _ = create.Write(buf.Bytes())
+			} else {
+				log.Println(fmt.Sprintf("the GOOS and GOARCH combo (%s, %s) is not supported.", sys, arch))
 			}
 		}
 	}
