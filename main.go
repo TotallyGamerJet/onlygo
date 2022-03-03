@@ -136,6 +136,14 @@ func main() {
 	})
 	var buf = &bytes.Buffer{}
 	for sys, lib := range libs {
+		create, err := os.Create(fileNameNoExt + "_" + sys + ".go")
+		if err != nil {
+			panic(err)
+		}
+		create.WriteString(fmt.Sprintf("package %s\n\t const _%s_SharedObject = %s\n", package_, fileNameNoExt, lib))
+		create.Close()
+	}
+	{ // Init function
 		buf.Reset()
 		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n\n")
 		buf.WriteString(fmt.Sprintf("package %s\n", package_))
@@ -156,7 +164,7 @@ import (
 
 		// Init function generation
 		buf.WriteString("func Init() error {\n")
-		buf.WriteString(fmt.Sprintf("\tlib, err := dl.Open(\"%s\", dl.ScopeGlobal)\n", lib))
+		buf.WriteString(fmt.Sprintf("\tlib, err := dl.Open(\"_%s_SharedObject\", dl.ScopeGlobal)\n", fileNameNoExt))
 		buf.WriteString("\tif err != nil {\n\t\treturn err\n\t}\n")
 		for _, f := range functions {
 			buf.WriteString(fmt.Sprintf("\t_%s, err = lib.Lookup(\"%s\")\n", f.name, f.linkname))
@@ -164,7 +172,7 @@ import (
 		}
 		buf.WriteString("\treturn nil\n")
 		buf.WriteString("}\n")
-		init, err := os.Create(fileNameNoExt + "_init_" + sys + ".go")
+		init, err := os.Create(fileNameNoExt + "_init.go")
 		if err != nil {
 			panic(err)
 			return
