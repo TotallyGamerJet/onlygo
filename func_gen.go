@@ -15,4 +15,10 @@ var generators = map[string]map[string]func(io.Writer, Function) FuncGen{
 		"arm64": newArm64FuncGen,
 		"amd64": newAmd64FuncGen,
 	},
+	"ios": {
+		"arm64": newArm64FuncGen,
+	},
+	"linux": {
+		"arm64": newArm64FuncGen,
+	},
 }
