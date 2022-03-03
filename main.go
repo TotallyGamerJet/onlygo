@@ -140,7 +140,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		create.WriteString(fmt.Sprintf("package %s\n\t const _%s_SharedObject = %s\n", package_, fileNameNoExt, lib))
+		create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
 		create.Close()
 	}
 	{ // Init function
