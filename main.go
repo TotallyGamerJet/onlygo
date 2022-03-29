@@ -77,23 +77,23 @@ func main() {
 	var libs = make(map[string]map[string]string) // the os -> arch -> shared object file
 	for _, cg := range file.Comments {
 		for _, c := range cg.List {
-			if !strings.HasPrefix(c.Text, "//onlygo:open") {
-				continue
+			switch {
+			case strings.HasPrefix(c.Text, "//onlygo:open"):
+				args := strings.Split(c.Text, " ")
+				if len(args) != 4 {
+					log.Printf("incorrect format GOT %s WANT //onlygo:open GOOS GOARCH LIB\n", c.Text)
+					continue
+				}
+				system := args[1]
+				arch := args[2]
+				lib := args[3]
+				archs := libs[system]
+				if archs == nil {
+					archs = make(map[string]string)
+					libs[system] = archs
+				}
+				archs[arch] = lib
 			}
-			args := strings.Split(c.Text, " ")
-			if len(args) != 4 {
-				log.Println("incorrect format for //onlygo:open GOOS GOARCH LIB")
-				continue
-			}
-			system := args[1]
-			arch := args[2]
-			lib := args[3]
-			archs := libs[system]
-			if archs == nil {
-				archs = make(map[string]string)
-				libs[system] = archs
-			}
-			archs[arch] = lib
 		}
 	}
 	ast.Inspect(file, func(node ast.Node) bool {
@@ -111,6 +111,12 @@ func main() {
 				typ := n.Type
 				name = n.Name.Name
 				linkname = name // linkname is guessed to be the same as the func name unless a go:linkname directive exists
+				var sigW = &strings.Builder{}
+				err = format.Node(sigW, fs, n)
+				if err != nil {
+					log.Println(err)
+				}
+				sig = sigW.String()
 				var comments []*ast.Comment
 				if n.Doc != nil {
 					comments = n.Doc.List
@@ -120,6 +126,7 @@ func main() {
 						continue
 					}
 					linkname = strings.Split(c.Text, " ")[1]
+					break
 				}
 				for _, v := range typ.Params.List {
 					for _, n := range v.Names {
