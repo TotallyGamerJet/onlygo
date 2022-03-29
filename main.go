@@ -111,12 +111,6 @@ func main() {
 				typ := n.Type
 				name = n.Name.Name
 				linkname = name // linkname is guessed to be the same as the func name unless a go:linkname directive exists
-				var sigW = &strings.Builder{}
-				err = format.Node(sigW, fs, n)
-				if err != nil {
-					log.Println(err)
-				}
-				sig = sigW.String()
 				var comments []*ast.Comment
 				if n.Doc != nil {
 					comments = n.Doc.List
@@ -128,6 +122,13 @@ func main() {
 					linkname = strings.Split(c.Text, " ")[1]
 					break
 				}
+				n.Doc = nil
+				var sigW = &strings.Builder{}
+				err = format.Node(sigW, fs, n)
+				if err != nil {
+					log.Println(err)
+				}
+				sig = sigW.String()
 				for _, v := range typ.Params.List {
 					for _, n := range v.Names {
 						ty := getType(v.Type)
