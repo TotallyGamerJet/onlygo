@@ -426,7 +426,7 @@ func newArm64FuncGen(w io.Writer, fn Function) FuncGen {
 			if resolveDL {
 				_, _ = fmt.Fprintf(w, "\tMOVD ·_%s(SB), R16\n\tCALL R16\n", name)
 			} else {
-				_, _ = fmt.Fprintf(w, "\tCALL _%s(SB)", name)
+				_, _ = fmt.Fprintf(w, "\tCALL _%s(SB)\n", name)
 			}
 		},
 	}
