@@ -75,9 +75,12 @@ func main() {
 	var package_ = file.Name.Name
 	var functions []Function                      // the functions to generate
 	var libs = make(map[string]map[string]string) // the os -> arch -> shared object file
+	var resolveWithDL = true                      // default is true; otherwise it uses cgo_import_dynamic directive
 	for _, cg := range file.Comments {
 		for _, c := range cg.List {
 			switch {
+			case strings.EqualFold(c.Text, "//onlygo:resolve_with_cgo"):
+				resolveWithDL = false
 			case strings.HasPrefix(c.Text, "//onlygo:open"):
 				args := strings.Split(c.Text, " ")
 				if len(args) != 4 {
@@ -122,7 +125,7 @@ func main() {
 					linkname = strings.Split(c.Text, " ")[1]
 					break
 				}
-				n.Doc = nil
+				n.Doc = nil // remove the comments so it doesn't interfere with printing the func sig
 				var sigW = &strings.Builder{}
 				err = format.Node(sigW, fs, n)
 				if err != nil {
@@ -156,10 +159,15 @@ func main() {
 				panic(err)
 			}
 			_, _ = create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
+			if !resolveWithDL {
+				for _, f := range functions {
+					_, _ = create.WriteString(fmt.Sprintf(`//go:cgo_import_dynamic %s %s "%s"`+"\n", f.name, f.linkname, lib))
+				}
+			}
 			_ = create.Close()
 		}
 	}
-	{ // Init function
+	if resolveWithDL { // Init function
 		buf.Reset()
 		buf.WriteString("// File generated using onlygo. DO NOT EDIT!!!\n\n")
 		buf.WriteString(fmt.Sprintf("package %s\n", package_))

@@ -22,7 +22,8 @@ Next, write stub functions for each C function you want to call.
 You MUST match the signature exactly so that onlygo can
 call the C function properly. Then above the function add a
 comment starting with `//onlygo:linkname` that will give the C
-name of the function as found in the dynamic library.
+name of the function as found in the dynamic library. This directive
+is only needed if the go function name doesn't match the C function.
 
 ```go
 //onlygo:linkname malloc
