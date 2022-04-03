@@ -81,8 +81,12 @@ func newAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 				panic(ty.kind)
 			}
 		},
-		GenCall: func(name string) {
-			fmt.Fprintf(w, "\tMOVD ·_%s(SB), AX\n\tCALL AX\n", name)
+		GenCall: func(name string, dlResolve bool) {
+			if dlResolve {
+				fmt.Fprintf(w, "\tMOVD ·_%s(SB), AX\n\tCALL AX\n", name)
+			} else {
+				fmt.Fprintf(w, "\tCALL %s(SB)\n", name)
+			}
 		},
 	}
 }

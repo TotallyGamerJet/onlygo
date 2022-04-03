@@ -422,8 +422,12 @@ func newArm64FuncGen(w io.Writer, fn Function) FuncGen {
 				panic(ty.kind)
 			}
 		},
-		GenCall: func(name string) {
-			_, _ = fmt.Fprintf(w, "\tMOVD ·_%s(SB), R16\n\tCALL R16\n", name)
+		GenCall: func(name string, resolveDL bool) {
+			if resolveDL {
+				_, _ = fmt.Fprintf(w, "\tMOVD ·_%s(SB), R16\n\tCALL R16\n", name)
+			} else {
+				_, _ = fmt.Fprintf(w, "\tCALL _%s(SB)", name)
+			}
 		},
 	}
 }

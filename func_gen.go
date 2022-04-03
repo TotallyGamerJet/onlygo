@@ -7,7 +7,7 @@ type FuncGen struct {
 	PostCall func()
 	MovInst  func(*Type)
 	RetInst  func(*Type)
-	GenCall  func(string)
+	GenCall  func(string, bool)
 }
 
 var generators = map[string]map[string]func(io.Writer, Function) FuncGen{

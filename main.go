@@ -161,7 +161,7 @@ func main() {
 			_, _ = create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
 			if !resolveWithDL {
 				for _, f := range functions {
-					_, _ = create.WriteString(fmt.Sprintf(`//go:cgo_import_dynamic %s %s "%s"`+"\n", f.name, f.linkname, lib))
+					_, _ = create.WriteString(fmt.Sprintf(`//go:cgo_import_dynamic _%s %s "%s"`+"\n", f.name, f.linkname, lib))
 				}
 			}
 			_ = create.Close()
@@ -225,7 +225,7 @@ import (
 					for _, arg := range f.args {
 						gen.MovInst(arg)
 					}
-					gen.GenCall(f.name)
+					gen.GenCall(f.name, resolveWithDL)
 					if f.ret.kind != VOID {
 						gen.RetInst(f.ret)
 					}
