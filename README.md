@@ -38,9 +38,14 @@ comment to make this process easier.
 ```
 
 OnlyGo will generate a file ending in `*_init.go`. This file contains a function
-with the signature `func Init()` that MUST be called before calling any of the
+with the signature `func Init() error` that MUST be called before calling any of the
 dynamically linked to functions. This function links the go function to the 
 C function.
+
+If you want OnlyGo to resolve the functions at execution time instead of
+requiring a call to an init function use the directive: `//onlygo:resolve_with_cgo`.
+NOTE: using the directive does NOT hinder the cross-complication benefits of using
+OnlyGo. The reason this is not the default is that it is likely to be more unstable.
 
 ## Type Guide
 TODO:
