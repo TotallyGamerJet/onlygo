@@ -158,8 +158,9 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
+			_, _ = create.WriteString(fmt.Sprintf("package %s\n\n", package_))
 			if resolveWithDL {
-				_, _ = create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
+				_, _ = create.WriteString(fmt.Sprintf("const _%s_SharedObject = \"%s\"\n", fileNameNoExt, lib))
 			} else {
 				for _, f := range functions {
 					_, _ = create.WriteString(fmt.Sprintf(`//go:cgo_import_dynamic _%s %s "%s"`+"\n", f.name, f.linkname, lib))
