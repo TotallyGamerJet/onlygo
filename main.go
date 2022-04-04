@@ -158,7 +158,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			if !resolveWithDL {
+			if resolveWithDL {
 				_, _ = create.WriteString(fmt.Sprintf("package %s\n\nconst _%s_SharedObject = \"%s\"\n", package_, fileNameNoExt, lib))
 			} else {
 				for _, f := range functions {
