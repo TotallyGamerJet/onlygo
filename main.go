@@ -288,11 +288,11 @@ func getType(expr ast.Expr) (ty *Type) {
 		ty.kind = I64
 	case "int":
 		ty.kind = INT
-	case "uint8":
+	case "uint8", "byte":
 		ty.kind = U8
 	case "uint16":
 		ty.kind = U16
-	case "uint32":
+	case "uint32", "rune":
 		ty.kind = U32
 	case "uint64":
 		ty.kind = U64
