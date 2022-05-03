@@ -85,7 +85,7 @@ func newAmd64FuncGen(w io.Writer, fn Function) FuncGen {
 			if dlResolve {
 				fmt.Fprintf(w, "\tMOVD ·_%s(SB), AX\n\tCALL AX\n", name)
 			} else {
-				fmt.Fprintf(w, "\tCALL %s(SB)\n", name)
+				fmt.Fprintf(w, "\tCALL _%s(SB)\n", name)
 			}
 		},
 	}
