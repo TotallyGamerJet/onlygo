@@ -1,3 +1,5 @@
+This project is not maintained. My effort has moved towards [ebitengine/purego](https://github.com/ebitengine/purego). It supports features that this project doesn't like Objective-C runtime bindings and callbacks that can be called from C.
+
 # onlygo
 OnlyGo generates go assembly wrappers into dynamically linked C code
 without the use of CGO.
